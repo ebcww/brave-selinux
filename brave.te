@@ -13,7 +13,7 @@ type brave_exec_t;
 application_domain(brave_t, brave_exec_t)
 role brave_roles types brave_t;
 
-permissive brave_t;
+#permissive brave_t;
 
 ########################################
 #
@@ -81,10 +81,87 @@ require {
         type staff_t;
 	type unconfined_t;
 	type user_t;
-	type sysadm_t;	
+	type sysadm_t;
+	type brave_t;
+	type systemd_resolved_var_run_t;
+	type session_dbusd_tmp_t;
+	type http_port_t;
+	type session_dbusd_tmp_t;
+	type staff_dbusd_t;
+	type user_dbusd_t;
+	type sysadm_dbusd_t;
+	type unconfined_dbusd_t;
+	type user_fonts_cache_t;
+	type cache_home_t;	
 }
-
-#============= staff_t ==============
 dev_rw_dma_dev(staff_t, user_t, sysadm_t, unconfined_t)
 fs_rw_inherited_tmpfs_files(staff_t, user_t ,sysadm_t, unconfined_t)
 fs_map_tmpfs_files(staff_t, user_t, sysadm_t, unconfined_t)
+kernel_read_proc_files(brave_t)
+userdom_use_inherited_user_ptys(brave_t)
+allow brave_t brave_exec_t:file execute_no_trans;
+allow brave_t self:cap_userns { sys_admin sys_chroot sys_ptrace };
+allow brave_t self:netlink_kobject_uevent_socket { bind create getattr getopt setopt };
+allow brave_t self:process { execmem setcap setsched };
+allow brave_t self:user_namespace create;
+allow brave_t systemd_resolved_var_run_t:dir { read watch };
+allow brave_t proc_t:dir read;
+allow brave_t tmp_t:dir { create rmdir };
+allow brave_t tmp_t:lnk_file { create unlink };
+allow brave_t tmp_t:sock_file { create getattr unlink write };
+
+
+#!!!! This avc can be allowed using the boolean 'domain_can_mmap_files'
+# I believe this is all we need less then we can make a donaudit of everything else
+# browsers are so over priviliged for such a dangerous application.
+allow brave_t user_fonts_cache_t:file map;
+allow brave_t tmpfs_t:file map;
+allow brave_t cache_home_t:file map;
+
+
+# Beta code this needs to mmap files
+allow brave_t http_port_t:tcp_socket name_connect;
+allow brave_t self:netlink_kobject_uevent_socket { bind create getattr getopt setopt };
+allow brave_t session_dbusd_tmp_t:sock_file getattr;
+allow brave_t session_dbusd_tmp_t:sock_file write;
+
+
+# We need to make sure all selinux users are compattible
+allow brave_t staff_dbusd_t:unix_stream_socket connectto;
+allow brave_t user_dbusd_t:unix_stream_socket connectto;
+allow brave_t sysadm_dbusd_t:unix_stream_socket connectto;
+allow brave_t unconfined_dbusd_t:unix_stream_socket connectto;
+
+
+
+allow brave_t tmp_t:sock_file { create getattr unlink write };
+allow brave_t unreserved_port_t:tcp_socket name_connect;
+allow brave_t unreserved_port_t:udp_socket name_bind;
+
+
+
+corecmd_check_exec_shell(brave_t)
+corecmd_exec_bin(brave_t)
+corenet_tcp_connect_unreserved_ports(brave_t)
+files_manage_generic_tmp_dirs(brave_t)
+files_manage_generic_tmp_files(brave_t)
+files_watch_etc_dirs(brave_t)
+files_watch_root_dirs(brave_t)
+files_watch_usr_dirs(brave_t)
+fs_getattr_tmpfs(brave_t)
+fs_getattr_xattr_fs(brave_t)
+fs_rw_tmpfs_files(brave_t)
+gnome_filetrans_cert_home_content(brave_t)
+gnome_filetrans_config_home_content(brave_t)
+gnome_manage_generic_cache_files(brave_t)
+gnome_manage_home_config(brave_t)
+gnome_manage_home_config_dirs(brave_t)
+gnome_map_home_config_file(brave_t)
+kernel_read_fs_sysctls(brave_t)
+miscfiles_watch_localization_dirs(brave_t)
+userdom_manage_home_certs(brave_t)
+
+
+
+
+
