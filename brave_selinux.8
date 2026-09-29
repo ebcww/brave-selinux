@@ -1,0 +1,277 @@
+.TH  "brave_selinux"  "8"  "26-09-29" "brave" "SELinux Policy brave"
+.SH "NAME"
+brave_selinux \- Security Enhanced Linux Policy for the brave processes
+.SH "DESCRIPTION"
+
+Security-Enhanced Linux secures the brave processes via flexible mandatory access control.
+
+The brave processes execute with the brave_t SELinux type. You can check if you have these processes running by executing the \fBps\fP command with the \fB\-Z\fP qualifier.
+
+For example:
+
+.B ps -eZ | grep brave_t
+
+
+.SH "ENTRYPOINTS"
+
+The brave_t SELinux type can be entered via the \fBbrave_exec_t\fP file type.
+
+The default entrypoint paths for the brave_t domain are the following:
+
+/opt/brave.com/brave-origin/brave, /opt/brave.com/brave-origin/brave-origin, /usr/bin/brave-origin
+.SH PROCESS TYPES
+SELinux defines process types (domains) for each process running on the system
+.PP
+You can see the context of a process using the \fB\-Z\fP option to \fBps\bP
+.PP
+Policy governs the access confined processes have to files.
+SELinux brave policy is very flexible allowing users to setup their brave processes in as secure a method as possible.
+.PP
+The following process types are defined for brave:
+
+.EX
+.B brave_t
+.EE
+.PP
+Note:
+.B semanage permissive -a brave_t
+can be used to make the process type brave_t permissive. SELinux does not deny access to permissive process types, but the AVC (SELinux denials) messages are still generated.
+
+.SH BOOLEANS
+SELinux policy is customizable based on least access required.  brave policy is extremely flexible and has several booleans that allow you to manipulate the policy and run brave with the tightest access possible.
+
+
+.PP
+If you want to allow system to run with NIS, you must turn on the nis_enabled boolean. Disabled by default.
+
+.EX
+.B setsebool -P nis_enabled 1
+
+.EE
+
+.SH "MANAGED FILES"
+
+The SELinux process type brave_t can manage files labeled with the following file types.  The paths listed are the default paths for these file types.  Note the processes UID still need to have DAC permissions.
+
+.br
+.B cache_home_t
+
+	/root/\.cache(/.*)?
+.br
+	/home/[^/]+/\.nv(/.*)?
+.br
+	/home/[^/]+/\.cache(/.*)?
+.br
+	/var/lib/plasmalogin/\.nv(/.*)?
+.br
+	/var/lib/plasmalogin/\.cache(/.*)?
+.br
+	/home/eveldun/\.nv(/.*)?
+.br
+	/home/eveldun/\.cache(/.*)?
+.br
+
+.br
+.B config_home_t
+
+	/root/\.kde(/.*)?
+.br
+	/root/\.xine(/.*)?
+.br
+	/root/\.config(/.*)?
+.br
+	/root/\.Xdefaults
+.br
+	/home/[^/]+/\.kde(/.*)?
+.br
+	/home/[^/]+/\.xine(/.*)?
+.br
+	/home/[^/]+/\.config(/.*)?
+.br
+	/home/[^/]+/\.cache/dconf(/.*)?
+.br
+	/home/[^/]+/\.Xdefaults
+.br
+	/run/user/[0-9]+/dconf(/.*)?
+.br
+	/var/lib/plasmalogin/\.kde(/.*)?
+.br
+	/var/lib/plasmalogin/\.xine(/.*)?
+.br
+	/var/lib/plasmalogin/\.config(/.*)?
+.br
+	/var/lib/plasmalogin/\.cache/dconf(/.*)?
+.br
+	/var/lib/plasmalogin/\.Xdefaults
+.br
+	/run/user/981/dconf(/.*)?
+.br
+	/home/eveldun/\.kde(/.*)?
+.br
+	/home/eveldun/\.xine(/.*)?
+.br
+	/home/eveldun/\.config(/.*)?
+.br
+	/home/eveldun/\.cache/dconf(/.*)?
+.br
+	/home/eveldun/\.Xdefaults
+.br
+	/run/user/1000/dconf(/.*)?
+.br
+
+.br
+.B home_cert_t
+
+	/root/\.pki(/.*)?
+.br
+	/root/\.cert(/.*)?
+.br
+	/home/[^/]+/\.pki(/.*)?
+.br
+	/home/[^/]+/\.cert(/.*)?
+.br
+	/home/[^/]+/\.local/share/networkmanagement/certificates(/.*)?
+.br
+	/home/[^/]+/\.kde/share/apps/networkmanagement/certificates(/.*)?
+.br
+	/var/lib/plasmalogin/\.pki(/.*)?
+.br
+	/var/lib/plasmalogin/\.cert(/.*)?
+.br
+	/var/lib/plasmalogin/\.local/share/networkmanagement/certificates(/.*)?
+.br
+	/var/lib/plasmalogin/\.kde/share/apps/networkmanagement/certificates(/.*)?
+.br
+	/home/eveldun/\.pki(/.*)?
+.br
+	/home/eveldun/\.cert(/.*)?
+.br
+	/home/eveldun/\.local/share/networkmanagement/certificates(/.*)?
+.br
+	/home/eveldun/\.kde/share/apps/networkmanagement/certificates(/.*)?
+.br
+
+.br
+.B krb5_host_rcache_t
+
+	/var/tmp/krb5_0.rcache2
+.br
+	/var/cache/krb5rcache(/.*)?
+.br
+	/var/tmp/nfs_0
+.br
+	/var/tmp/DNS_25
+.br
+	/var/tmp/host_0
+.br
+	/var/tmp/imap_0
+.br
+	/var/tmp/HTTP_23
+.br
+	/var/tmp/HTTP_48
+.br
+	/var/tmp/ldap_55
+.br
+	/var/tmp/ldap_487
+.br
+	/var/tmp/ldapmap1_0
+.br
+
+.br
+.B tmp_t
+
+	/sandbox(/.*)?
+.br
+	/tmp
+.br
+	/usr/tmp
+.br
+	/var/tmp
+.br
+	/var/tmp
+.br
+	/tmp-inst
+.br
+	/var/tmp-inst
+.br
+	/var/tmp/tmp-inst
+.br
+	/var/tmp/vi\.recover
+.br
+
+.br
+.B tmpfs_t
+
+	/dev/shm
+.br
+	/run/shm
+.br
+	/usr/lib/udev/devices/shm
+.br
+
+.SH FILE CONTEXTS
+SELinux requires files to have an extended attribute to define the file type.
+.PP
+You can see the context of a file using the \fB\-Z\fP option to \fBls\bP
+.PP
+Policy governs the access confined processes have to these files.
+SELinux brave policy is very flexible allowing users to setup their brave processes in as secure a method as possible.
+.PP
+
+.PP
+.B STANDARD FILE CONTEXT
+
+SELinux defines the file context types for the brave, if you wanted to
+store files with these types in a different paths, you need to execute the semanage command to specify alternate labeling and then use restorecon to put the labels on disk.
+
+.B semanage fcontext -a -t brave_exec_t '/srv/brave/content(/.*)?'
+.br
+.B restorecon -R -v /srv/mybrave_content
+
+Note: SELinux often uses regular expressions to specify labels that match multiple files.
+
+.I The following file types are defined for brave:
+
+
+.EX
+.PP
+.B brave_exec_t
+.EE
+
+- Set files with the brave_exec_t type, if you want to transition an executable to the brave_t domain.
+
+.br
+.TP 5
+Paths:
+/opt/brave.com/brave-origin/brave, /opt/brave.com/brave-origin/brave-origin, /usr/bin/brave-origin
+
+.PP
+Note: File context can be temporarily modified with the chcon command.  If you want to permanently change the file context you need to use the
+.B semanage fcontext
+command.  This will modify the SELinux labeling database.  You will need to use
+.B restorecon
+to apply the labels.
+
+.SH "COMMANDS"
+.B semanage fcontext
+can also be used to manipulate default file context mappings.
+.PP
+.B semanage permissive
+can also be used to manipulate whether or not a process type is permissive.
+.PP
+.B semanage module
+can also be used to enable/disable/install/remove policy modules.
+
+.B semanage boolean
+can also be used to manipulate the booleans
+
+.PP
+.B system-config-selinux
+is a GUI tool available to customize SELinux policy settings.
+
+.SH AUTHOR
+This manual page was auto-generated using
+.B "sepolicy manpage".
+
+.SH "SEE ALSO"
+selinux(8), brave(8), semanage(8), restorecon(8), chcon(1), sepolicy(8), setsebool(8)
