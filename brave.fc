@@ -1,0 +1,4 @@
+/opt/brave.com/brave-origin/brave		--	gen_context(system_u:object_r:brave_exec_t,s0)
+/opt/brave.com/brave-origin/brave-origin               --      gen_context(system_u:object_r:brave_exec_t,s0)
+/usr/bin/brave-origin               --      gen_context(system_u:object_r:brave_exec_t,s0)
+

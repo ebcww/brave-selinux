@@ -1,0 +1,90 @@
+policy_module(brave, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+attribute_role brave_roles;
+roleattribute system_r brave_roles;
+
+type brave_t;
+type brave_exec_t;
+application_domain(brave_t, brave_exec_t)
+role brave_roles types brave_t;
+
+permissive brave_t;
+
+########################################
+#
+# brave local policy
+#
+allow brave_t self:capability { sys_chroot };
+allow brave_t self:process { fork ptrace setpgid setrlimit signal_perms };
+
+allow brave_t self:fifo_file manage_fifo_file_perms;
+allow brave_t self:unix_stream_socket create_stream_socket_perms;
+
+domain_use_interactive_fds(brave_t)
+
+files_read_etc_files(brave_t)
+
+auth_use_nsswitch(brave_t)
+
+logging_send_syslog_msg(brave_t)
+
+miscfiles_read_localization(brave_t)
+
+optional_policy(`
+	gen_require(`
+		type staff_t;
+		role staff_r;
+	')
+
+	brave_run(staff_t, staff_r)
+')
+
+optional_policy(`
+	gen_require(`
+		type sysadm_t;
+		role sysadm_r;
+	')
+
+	brave_run(sysadm_t, sysadm_r)
+')
+
+optional_policy(`
+	gen_require(`
+		type unconfined_t;
+		role unconfined_r;
+	')
+
+	brave_run(unconfined_t, unconfined_r)
+')
+
+optional_policy(`
+	gen_require(`
+		type user_t;
+		role user_r;
+	')
+
+	brave_run(user_t, user_r)
+')
+
+optional_policy(`
+	dbus_system_bus_client(brave_t)
+	dbus_connect_system_bus(brave_t)
+')
+
+
+require {
+        type staff_t;
+	type unconfined_t;
+	type user_t;
+	type sysadm_t;	
+}
+
+#============= staff_t ==============
+dev_rw_dma_dev(staff_t, user_t, sysadm_t, unconfined_t)
+fs_rw_inherited_tmpfs_files(staff_t, user_t ,sysadm_t, unconfined_t)
+fs_map_tmpfs_files(staff_t, user_t, sysadm_t, unconfined_t)

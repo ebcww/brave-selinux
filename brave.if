@@ -1,0 +1,116 @@
+
+## <summary>policy for brave</summary>
+
+########################################
+## <summary>
+##	Execute brave_exec_t in the brave domain.
+## </summary>
+## <param name="domain">
+## <summary>
+##	Domain allowed to transition.
+## </summary>
+## </param>
+#
+interface(`brave_domtrans',`
+	gen_require(`
+		type brave_t, brave_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	domtrans_pattern($1, brave_exec_t, brave_t)
+')
+
+######################################
+## <summary>
+##	Execute brave in the caller domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`brave_exec',`
+	gen_require(`
+		type brave_exec_t;
+	')
+
+	corecmd_search_bin($1)
+	can_exec($1, brave_exec_t)
+')
+
+########################################
+## <summary>
+##	Execute brave in the brave domain, and
+##	allow the specified role the brave domain.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed to transition
+##	</summary>
+## </param>
+## <param name="role">
+##	<summary>
+##	The role to be allowed the brave domain.
+##	</summary>
+## </param>
+#
+interface(`brave_run',`
+	gen_require(`
+		type brave_t;
+		attribute_role brave_roles;
+	')
+
+	brave_domtrans($1)
+	roleattribute $2 brave_roles;
+')
+
+########################################
+## <summary>
+##	Role access for brave
+## </summary>
+## <param name="role">
+##	<summary>
+##	Role allowed access
+##	</summary>
+## </param>
+## <param name="domain">
+##	<summary>
+##	User domain for the role
+##	</summary>
+## </param>
+#
+interface(`brave_role',`
+	gen_require(`
+		type brave_t;
+		attribute_role brave_roles;
+	')
+
+	roleattribute $1 brave_roles;
+
+	brave_domtrans($2)
+
+	ps_process_pattern($2, brave_t)
+	allow $2 brave_t:process { signull signal sigkill };
+')
+
+########################################
+## <summary>
+##	Send and receive messages from
+##	brave over dbus.
+## </summary>
+## <param name="domain">
+##	<summary>
+##	Domain allowed access.
+##	</summary>
+## </param>
+#
+interface(`brave_dbus_chat',`
+	gen_require(`
+		type brave_t;
+		class dbus send_msg;
+	')
+
+	allow $1 brave_t:dbus send_msg;
+	allow brave_t $1:dbus send_msg;
+')
